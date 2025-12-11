@@ -1,0 +1,6 @@
+path: /hd2/marcos/research/repos/pig-segmentation-distill/data/SAM3_PigLife
+train: train/images
+val: val/images
+test: test/images
+nc: 1
+names: ['pig']

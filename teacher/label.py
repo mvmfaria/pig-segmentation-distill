@@ -12,7 +12,7 @@ token = os.getenv("HF_TOKEN")
 
 from transformers import Sam3Processor, Sam3Model
 
-SOURCE_IMAGE_DIR = "/hd2/marcos/research/repos/cross-domain-pig-detection/data/PigLife/test/images"
+SOURCE_IMAGE_DIR = "/hd2/marcos/research/repos/cross-domain-pig-detection/data/PigLife/val/images"
 OUTPUT_DATA_DIR = "/hd2/marcos/research/repos/pig-segmentation-distill/data/SAM3_PigLife"
 CLASS_PROMPT = "pig"
 CLASS_ID = 0
@@ -48,8 +48,8 @@ def label():
     model = Sam3Model.from_pretrained("facebook/sam3").to(device)
     processor = Sam3Processor.from_pretrained("facebook/sam3")
     
-    os.makedirs(f"{OUTPUT_DATA_DIR}/test/images", exist_ok=True)
-    os.makedirs(f"{OUTPUT_DATA_DIR}/test/labels", exist_ok=True)
+    os.makedirs(f"{OUTPUT_DATA_DIR}/val/images", exist_ok=True)
+    os.makedirs(f"{OUTPUT_DATA_DIR}/val/labels", exist_ok=True)
     
     image_files = [f for f in os.listdir(SOURCE_IMAGE_DIR) if f.lower().endswith(".jpg")]
     print(f"Found {len(image_files)} images.")
@@ -92,11 +92,11 @@ def label():
                 yolo_lines.append(line)
         
         if yolo_lines:
-            out_img_path = f"{OUTPUT_DATA_DIR}/test/images/{img_name}"
+            out_img_path = f"{OUTPUT_DATA_DIR}/val/images/{img_name}"
             image.save(out_img_path)
             
             txt_name = os.path.splitext(img_name)[0] + ".txt"
-            out_txt_path = f"{OUTPUT_DATA_DIR}/test/labels/{txt_name}"
+            out_txt_path = f"{OUTPUT_DATA_DIR}/val/labels/{txt_name}"
             with open(out_txt_path, "w") as f:
                 f.write("\n".join(yolo_lines))
 
