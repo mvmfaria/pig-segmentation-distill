@@ -2,19 +2,22 @@
 
 ## 1. Baseline: Supervised Learning (Human Labels)
 *Performance of YOLOv8 trained directly on the original PigLife human-annotated dataset.*
-*(TBD)*
 
----
+| Model   | mAP_50-95 | mAP_50 | mAP_75 | AP_Medium | AP_Large |
+|---------|-----------|--------|--------|-----------|----------|
+| yolov8n | 88.13     | 98.94  | 95.75  | 40.20     | 88.54    |
+| yolov8s | 90.57     | 98.97  | 96.89  | 42.30     | 90.88    |
+| yolov8m | 91.84     | 98.98  | 97.78  | 42.11     | 92.04    |
 
 ## 2. Teacher Baseline: SAM3 Zero-shot Performance
 *Evaluated on the PigLife Test Set (Human Ground Truth).*
 
-| Subset | mAP | mAP@50 | mAP@75 | AP (Medium) | AP (Large) |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **Test** | **80.73%** | **93.61%** | **88.38%** | 3.74% | 81.13% |
+| Model          | mAP_50-95 | mAP_50 | mAP_75 | AP_Medium | AP_Large |
+|----------------|-----------|--------|--------|-----------|----------|
+| zero-shot SAM3 | 80.73     | 93.61  | 88.38  | 3.74      | 81.12    |
 
 ### Observations on Ground Truth Quality
-We observed a discrepancy between SAM3 predictions and Human Ground Truth:
+That is a discrepancy between SAM3 predictions and Human Ground Truth:
 
 **1. "False Positives" are actually Unlabeled Pigs:**
 SAM3 successfully detects pigs that were missing from the human annotations (likely background pigs or piglets intentionally ignored by annotators). These correct detections are penalized as "False Positives" by the mAP metric.
@@ -47,8 +50,8 @@ The low score on `AP_Medium` (3.74%) correlates with the observation above. The 
 
 > **Note:** We've got that warning: "UserWarning: Encountered more than 100 detections in a single image. This means that certain detections with the lowest scores will be ignored, that may have an undesirable impact on performance. Please consider adjusting the `max_detection_threshold` to suit your use case."
 
-| Model | mAP | mAP@50 | mAP@75 | AP (Medium) | AP (Large) |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **YOLOv8n** | 76.79% | 93.27% | 86.31% | 4.84% | 77.18% |
-| **YOLOv8s** | 78.77% | **93.61%** | 87.74% | 6.31% | 79.14% |
-| **YOLOv8m** | **79.39%** | 93.55% | **88.22%** | **6.53%** | **79.80%** |
+| Model   | mAP_50-95 | mAP_50 | mAP_75 | AP_Medium | AP_Large |
+|---------|-----------|--------|--------|-----------|----------|
+| yolov8n | 76.79     | 93.26  | 86.30  | 4.83      | 77.17    |
+| yolov8s | 78.76     | 93.61  | 87.74  | 6.31      | 79.13    |
+| yolov8m | 79.38     | 93.55  | 88.21  | 6.53      | 79.80    |
