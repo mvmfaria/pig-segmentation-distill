@@ -13,6 +13,8 @@ from transformers import Sam3Processor, Sam3Model
 CLASS_PROMPT = "pig"
 CLASS_ID = 0
 CONFIDENCE_THRESHOLD = 0.4
+SOURCE_ROOT = "/hd2/marcos/research/repos/pig-segmentation-distill/data/PigLife"
+OUTPUT_ROOT = "/hd2/marcos/research/repos/pig-segmentation-distill/data/SAM3_PigLife"
 
 def convert_box_to_yolo(box, img_width, img_height):
     x_min, y_min, x_max, y_max = box
@@ -34,16 +36,22 @@ def convert_box_to_yolo(box, img_width, img_height):
         max(0.0, min(1.0, h_norm))
     ]
 
-def label(output_data_dir, souce_image_dir):
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+def create_output_dir(subset_name):
+    out_dir = os.path.join(OUTPUT_ROOT, subset_name)
+    os.makedirs(out_dir, exist_ok=True)
+
+    dst_img_dir = os.path.join(OUTPUT_ROOT, subset_name, "images")
+    dst_lbl_dir = os.path.join(OUTPUT_ROOT, subset_name, "labels")
+    os.makedirs(dst_img_dir, exist_ok=True)
+    os.makedirs(dst_lbl_dir, exist_ok=True)
+
+def label(subset_name, model, processor, device):
+    create_output_dir(subset_name)
     
-    model = Sam3Model.from_pretrained("facebook/sam3").to(device)
-    processor = Sam3Processor.from_pretrained("facebook/sam3")
-    
-    image_files = [f for f in os.listdir(souce_image_dir) if f.lower().endswith(".jpg")]
+    image_files = [f for f in os.listdir(os.path.join(SOURCE_ROOT, subset_name, "images")) if f.lower().endswith(".jpg")]
     
     for img_name in tqdm(image_files):
-        img_path = os.path.join(souce_image_dir, img_name)
+        img_path = os.path.join(SOURCE_ROOT, subset_name, "images", img_name)
         
         image = Image.open(img_path).convert("RGB")
         w, h = image.size
@@ -75,20 +83,30 @@ def label(output_data_dir, souce_image_dir):
             yolo_box = convert_box_to_yolo(box, w, h)
             
             box_str = " ".join([f"{coord:.6f}" for coord in yolo_box])
-            line = f"{CLASS_ID} {box_str} {score:.6f}"
+            if subset_name == "test":
+                line = f"{CLASS_ID} {box_str} {score:.6f}"
+            else:
+                line = f"{CLASS_ID} {box_str}"
             yolo_lines.append(line)
+        
+        out_img_path = os.path.join(OUTPUT_ROOT, subset_name, "images", img_name)
+        image.save(out_img_path)
         
         if yolo_lines:
             txt_name = os.path.splitext(img_name)[0] + ".txt"
-            out_txt_path = f"{output_data_dir}/{txt_name}"
+            out_txt_path = os.path.join(OUTPUT_ROOT, subset_name, "labels", txt_name)
             with open(out_txt_path, "w") as f:
                 f.write("\n".join(yolo_lines))
+        else:
+            txt_name = os.path.splitext(img_name)[0] + ".txt"
+            out_txt_path = os.path.join(OUTPUT_ROOT, subset_name, "labels", txt_name)
+            open(out_txt_path, "w").close()
 
 if __name__ == "__main__":
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model = Sam3Model.from_pretrained("facebook/sam3").to(device)
+    processor = Sam3Processor.from_pretrained("facebook/sam3")
     subsets = ["test", "train", "val"]
 
     for set in subsets:
-        os.makedirs(f"/hd2/marcos/research/repos/pig-segmentation-distill/data/SAM3_PigLife_labels/{set}", exist_ok=True)
-        souce_image_dir = f"/hd2/marcos/research/repos/pig-segmentation-distill/data/PigLife/{set}/images"
-        output_data_dir = f"/hd2/marcos/research/repos/pig-segmentation-distill/data/SAM3_PigLife_labels/{set}" 
-        label(output_data_dir, souce_image_dir)
+        label(set, model, processor, device)

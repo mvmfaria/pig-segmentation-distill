@@ -5,9 +5,10 @@ from PIL import Image
 from tqdm import tqdm
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
 
+MODEL = "yolov8s"
 GT_ROOT = "/hd2/marcos/research/repos/pig-segmentation-distill/data/PigLife"
-PRED_ROOT = "/hd2/marcos/research/repos/pig-segmentation-distill/data/SAM3_PigLife_labels"
-TEACHER_PATH = "/hd2/marcos/research/repos/pig-segmentation-distill/teacher"
+PRED_ROOT = f"/hd2/marcos/research/repos/pig-segmentation-distill/student/sizes/results/detection/{MODEL}/test_predictions_txt"
+OUTPUT_METRICS_PATH = f"/hd2/marcos/research/repos/pig-segmentation-distill/student/sizes/results/detection/{MODEL}"
 
 SUBSET = "test"
 
@@ -47,7 +48,6 @@ def read_yolo_file(file_path, w, h, is_gt=False):
 def evaluate_subset(subset_name):
     gt_img_dir = os.path.join(GT_ROOT, subset_name, "images")
     gt_lbl_dir = os.path.join(GT_ROOT, subset_name, "labels")
-    pred_lbl_dir = os.path.join(PRED_ROOT, subset_name)
 
     metric = MeanAveragePrecision(box_format="xyxy", iou_type="bbox")
     
@@ -75,7 +75,7 @@ def evaluate_subset(subset_name):
             "labels": gt_labels
         })
         
-        pred_path = os.path.join(pred_lbl_dir, txt_file)
+        pred_path = os.path.join(PRED_ROOT, txt_file)
         p_boxes, p_labels, p_scores = read_yolo_file(pred_path, w, h, is_gt=False)
         
         preds.append({
@@ -89,7 +89,7 @@ def evaluate_subset(subset_name):
 
     metrics = []
     metrics.append({
-        "Subset": SUBSET,
+        "Model": MODEL,
         "mAP": result['map'].item(),
         "mAP_50": result['map_50'].item(),
         "mAP_75": result['map_75'].item(),
@@ -98,7 +98,7 @@ def evaluate_subset(subset_name):
     })
 
     df = pd.DataFrame(metrics)
-    df.to_csv(f"{TEACHER_PATH}/SAM3_PigLife_performance.csv", index=False)
+    df.to_csv(f"{OUTPUT_METRICS_PATH}/{MODEL}_performance.csv", index=False)
 
 if __name__ == "__main__":
     evaluate_subset(SUBSET)

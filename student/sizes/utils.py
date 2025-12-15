@@ -28,11 +28,9 @@ def measure_inference_time(model, warmups=10, runs=100, imgsz=640):
     return avg_time_ms
 
 def evaluate(model, train_metrics):
-    map50_mask = train_metrics.seg.map50
-    map50_95_mask = train_metrics.seg.map
-    
-    dummy_input = torch.randn(1, 3, IMGSZ, IMGSZ)
+    map50_box = train_metrics.box.map50
+    map50_95_box = train_metrics.box.map
     latency_ms = measure_inference_time(model.model, imgsz=IMGSZ)
     fps = 1000 / latency_ms
 
-    return map50_mask, map50_95_mask, latency_ms, fps
+    return map50_box, map50_95_box, latency_ms, fps
