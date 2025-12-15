@@ -20,8 +20,8 @@ We observed a discrepancy between SAM3 predictions and Human Ground Truth:
 SAM3 successfully detects pigs that were missing from the human annotations (likely background pigs or piglets intentionally ignored by annotators). These correct detections are penalized as "False Positives" by the mAP metric.
 
 <div align="center">
-  <img src="../pig-segmentation-distill/teacher/outputs/1010s1120s2001-2s5300-1-31.png" width="45%">
-  <img src="../pig-segmentation-distill/teacher/outputs/1010s1121s2001-2s5101-2-631.png" width="45%">
+  <img src="teacher/outputs/1010s1120s2001-2s5300-1-31.png" width="45%">
+  <img src="teacher/outputs/1010s1121s2001-2s5101-2-631.png" width="45%">
   <p><em>Figure 1 & 2: SAM3 detections (green) identifying pigs not present in Ground Truth.</em></p>
 </div>
 
