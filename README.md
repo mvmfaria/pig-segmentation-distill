@@ -3,11 +3,17 @@
 ## 1. Baseline: Supervised Learning (Human Labels)
 *Performance of YOLOv8 trained directly on the original PigLife human-annotated dataset.*
 
+*Using torchmetrics*
 | Model   | mAP_50-95 | mAP_50 | mAP_75 | AP_Medium | AP_Large |
 |---------|-----------|--------|--------|-----------|----------|
 | yolov8n | 88.13     | 98.94  | 95.75  | 40.20     | 88.54    |
 | yolov8s | 90.57     | 98.97  | 96.89  | 42.30     | 90.88    |
 | yolov8m | 91.84     | 98.98  | 97.78  | 42.11     | 92.04    |
+
+*Using pycocotools*
+| Model          | mAP_50-95 | mAP_50 | mAP_75 | AP_Medium | AP_Large |
+|----------------|-----------|--------|--------|-----------|----------|
+| yolov8n        | 88.14     | 98.94  | 95.75  | 40.20     | 88.55    |
 
 ## 2. Teacher Baseline: SAM3 Zero-shot Performance
 *Evaluated on the PigLife Test Set (Human Ground Truth).*
