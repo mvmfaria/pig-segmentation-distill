@@ -69,21 +69,24 @@ def calculate_coco_metrics(ground_truth_path, predictions_path, output_path, mod
 
 if __name__ == "__main__":
     ground_truth_path = "/hd2/marcos/research/repos/pig-segmentation-distill/data/PigLife/test/test.json"
-    avoid = ["1010s1120s2001-2s5300-1", "1010s1121s2001-2s5101-1", "1010s1121s2001-2s5101-2", "1010s1121s2001-2s5301-1",
-    "1010s1121s2001-2s5302-1", "1010s1121s3001-2s5001-1"]
+    # avoid = ["1010s1120s2001-2s5300-1", "1010s1121s2001-2s5101-1", "1010s1121s2001-2s5101-2", "1010s1121s2001-2s5301-1",
+    # "1010s1121s2001-2s5302-1", "1010s1121s3001-2s5001-1", "1050s1132a1110s3003-3s5001-1", "1050s1132a1110s3003-3s5001-2", 
+    # "1050s1132a1110s3003-3s5001-4-16", "1050s1132a1110s3003-5s5001"]
+
+    avoid = ["1060s1112s4001-3s5300-1", "1060a1000s1110s4001-2s5001-1", "1050s1132a1110s3003-3s5001-2", "1060s1112s3004-3s5001-1", "1060s1112s4001-3s5001-1", "1050s1132a1110s3003-5s5001"]
 
     # Zero-shot SAM3:
-    # model = "sam3"
-    # context = "zero_shot"
-    # output_path = f"/hd2/marcos/research/repos/pig-segmentation-distill/results/filtered/{model}_{context}_performance.json"
-    # predictions_path = f"/hd2/marcos/research/repos/pig-segmentation-distill/teacher/predictions.json"
-    # calculate_coco_metrics(ground_truth_path, predictions_path, output_path, model_name=model, trained=context, problematic_list=avoid)
+    model = "sam3"
+    context = "zero_shot"
+    output_path = f"/hd2/marcos/research/repos/pig-segmentation-distill/results/filtered/{model}_{context}_performance_avoid_last_findings.json"
+    predictions_path = f"/hd2/marcos/research/repos/pig-segmentation-distill/teacher/predictions.json"
+    calculate_coco_metrics(ground_truth_path, predictions_path, output_path, model_name=model, trained=context, problematic_list=avoid)
 
     # YOLO models:
-    models = ["yolov8n", "yolov8s", "yolov8m"]
-    contexts = ["baseline", "sam3trained"]
-    for model in models:
-        for context in contexts:
-            output_path = f"/hd2/marcos/research/repos/pig-segmentation-distill/results/filtered/{model}_{context}_performance.json"
-            predictions_path = f"/hd2/marcos/research/repos/pig-segmentation-distill/student/sizes/results/{context}/{model}/predictions.json"
-            calculate_coco_metrics(ground_truth_path, predictions_path, output_path, model_name=model, trained=context, problematic_list=avoid)
+    # models = ["yolov8n", "yolov8s", "yolov8m"]
+    # contexts = ["baseline", "sam3trained"]
+    # for model in models:
+    #     for context in contexts:
+    #         output_path = f"/hd2/marcos/research/repos/pig-segmentation-distill/results/filtered/{model}_{context}_performance.json"
+    #         predictions_path = f"/hd2/marcos/research/repos/pig-segmentation-distill/student/sizes/results/{context}/{model}/predictions.json"
+    #         calculate_coco_metrics(ground_truth_path, predictions_path, output_path, model_name=model, trained=context, problematic_list=avoid)
