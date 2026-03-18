@@ -1,5 +1,9 @@
 # Data Distillation (or Weak label annotation?) Experiment
 
+## Repo Structure
+
+For a suggested cleanup layout (where to put notebooks vs reusable code vs generated artifacts) see `docs/REPO_ORGANIZATION.md`.
+
 ## 1. Baseline: Supervised Learning (Human Labels)
 *Performance of YOLOv8 trained directly on the original PigLife human-annotated dataset.*
 

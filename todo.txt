@@ -1,3 +1,0 @@
-1. Validar se a conversão dos bounding boxes está incorreta
-2. Validar outros possíveis problemas nas predições/rótulos
-3. Erros em cenários específicos

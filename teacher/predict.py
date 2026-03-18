@@ -12,7 +12,7 @@ from transformers import Sam3Processor, Sam3Model
 
 CLASS_PROMPT = "pig"
 CLASS_ID = 1
-CONFIDENCE_THRESHOLD = 0.8
+CONFIDENCE_THRESHOLD = 0.4
 SOURCE_ROOT = "/hd2/marcos/research/repos/pig-segmentation-distill/data/PigLife"
 OUTPUT_ROOT = "/hd2/marcos/research/repos/pig-segmentation-distill/teacher"
 
@@ -26,7 +26,7 @@ def generate_predictions(subset_name, model, processor, device):
         img_path = os.path.join(image_dir, img_name)
         image = Image.open(img_path).convert("RGB")
         
-        inputs = processor(images=image, text=CLASS_PROMPT, return_tensors="pt").to(device)
+        inputs = processor(images=image, text=CLASS_PROMPT, return_tensors="pt").to(device, dtype=torch.bfloat16)
         with torch.no_grad():
             outputs = model(**inputs)
         
@@ -36,8 +36,8 @@ def generate_predictions(subset_name, model, processor, device):
             target_sizes=inputs.get("original_sizes").tolist()
         )[0]
         
-        boxes = results["boxes"].cpu().numpy()
-        scores = results["scores"].cpu().numpy()
+        boxes = results["boxes"].float().cpu().numpy()
+        scores = results["scores"].float().cpu().numpy()
 
         image_id = os.path.splitext(img_name)[0]
 
@@ -62,7 +62,12 @@ def generate_predictions(subset_name, model, processor, device):
     
 if __name__ == "__main__":
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    model = Sam3Model.from_pretrained("facebook/sam3").to(device)
+    
+    model = Sam3Model.from_pretrained(
+        "facebook/sam3", 
+        torch_dtype=torch.bfloat16
+    ).to(device)
+    
     processor = Sam3Processor.from_pretrained("facebook/sam3")
     
     generate_predictions("test", model, processor, device)

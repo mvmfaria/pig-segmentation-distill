@@ -78,9 +78,9 @@ if __name__ == "__main__":
     # Zero-shot SAM3:
     model = "sam3"
     context = "zero_shot"
-    output_path = f"/hd2/marcos/research/repos/pig-segmentation-distill/results/filtered/{model}_{context}_performance_avoid_last_findings.json"
-    predictions_path = f"/hd2/marcos/research/repos/pig-segmentation-distill/teacher/predictions.json"
-    calculate_coco_metrics(ground_truth_path, predictions_path, output_path, model_name=model, trained=context, problematic_list=avoid)
+    output_path = f"/hd2/marcos/research/repos/pig-segmentation-distill/results/{model}_{context}_threshould_0.4.json"
+    predictions_path = f"/hd2/marcos/research/repos/pig-segmentation-distill/teacher/predictions_threshold_0.4.json"
+    calculate_coco_metrics(ground_truth_path, predictions_path, output_path, model_name=model, trained=context)
 
     # YOLO models:
     # models = ["yolov8n", "yolov8s", "yolov8m"]

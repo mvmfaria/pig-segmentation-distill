@@ -1,10 +1,15 @@
 venv/
+.venv/
 data/
 .env
 videos/
 models/
 *.pt
 __pycache__/
+.ipynb_checkpoints/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
 student/sizes/results
 experiments/
 teacher/test

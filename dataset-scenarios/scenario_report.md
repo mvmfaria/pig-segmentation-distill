@@ -1,6 +1,8 @@
-# PigLife Scenarios
+# Scenario Visual Report
 
-## Source: test subset
+Generated pipeline run.
+
+---
 
 ### Group 1
 **Filter IDs:** `1050s1132a1110s3003-3s5001`
@@ -63,3 +65,6 @@
 **Total Images Available:** 67
 
 ![Group 8](./plots/group_8_random_summary.png)
+
+---
+

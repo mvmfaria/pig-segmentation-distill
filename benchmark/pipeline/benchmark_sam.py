@@ -9,7 +9,10 @@ import time
 SOURCE_ROOT = "/hd2/marcos/research/repos/pig-segmentation-distill/data/PigLife"
 
 def benchmark_sam(subset_name, warmup=20):
-    model = Sam3Model.from_pretrained("facebook/sam3").to("cuda")
+    model = Sam3Model.from_pretrained(
+    "facebook/sam3",
+    torch_dtype=torch.bfloat16
+    ).to("cuda")
     processor = Sam3Processor.from_pretrained("facebook/sam3")
 
     image_dir = os.path.join(SOURCE_ROOT, subset_name, "images")
@@ -19,14 +22,14 @@ def benchmark_sam(subset_name, warmup=20):
     with torch.no_grad():
         for _ in range(warmup):
             img = Image.open(os.path.join(image_dir, image_files[0])).convert("RGB")
-            inputs = processor(images=img, text="pig", return_tensors="pt").to("cuda")
+            inputs = processor(images=img, text="pig", return_tensors="pt").to("cuda", dtype=torch.bfloat16)
             outputs = model(**inputs)
             _ = processor.post_process_instance_segmentation(outputs, target_sizes=inputs.get("original_sizes").tolist())
         torch.cuda.synchronize()
         for img_name in image_files:
             img = Image.open(os.path.join(image_dir, img_name)).convert("RGB")
             start_time = time.perf_counter()
-            inputs = processor(images=img, text="pig", return_tensors="pt").to("cuda")
+            inputs = processor(images=img, text="pig", return_tensors="pt").to("cuda", dtype=torch.bfloat16)
             outputs = model(**inputs)
             _ = processor.post_process_instance_segmentation(outputs, target_sizes=inputs.get("original_sizes").tolist())
             torch.cuda.synchronize()
