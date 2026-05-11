@@ -1,14 +1,15 @@
 from pathlib import Path
-from env import Env
+from dotenv import load_dotenv
 from invoke import task
+import os
 
 PROJECT_DIR = Path(__file__).resolve().parent
 DATASET_DIR = PROJECT_DIR / "datasets"
 PIGLIFE_DIR = DATASET_DIR / "piglife"
 ZIP_DIR = PIGLIFE_DIR / "zip"
 RAW_DIR = PIGLIFE_DIR / "raw"
-PIGLIFE_URL = Env.get("PIGLIFE_URL")
-
+load_dotenv()
+PIGLIFE_URL = os.getenv("PIGLIFE_URL")
 
 def ensure_directories():
     ZIP_DIR.mkdir(parents=True, exist_ok=True)
@@ -24,12 +25,27 @@ def download(c):
             "Define PIGLIFE_URL with the link for the PigLife dataset before running this task."
         )
 
-    # c.run(f'wget -O "{ZIP_DIR / "piglife.zip"}" "{PIGLIFE_URL}"')
+    if not (ZIP_DIR / "piglife.zip").exists():
+        c.run(f'wget -O "{ZIP_DIR / "piglife.zip"}" "{PIGLIFE_URL}"')
 
 @task(pre=[download])
 def setup(c):
     ensure_directories()
-    c.run(f'unzip -q "{ZIP_DIR / "piglife.zip"}" -d "{RAW_DIR}"')
+
+    piglife_zip = ZIP_DIR / "piglife.zip"
+    if not os.listdir(RAW_DIR):
+        c.run(f'unzip -q "{piglife_zip}" -d "{RAW_DIR}"')
+
+    images_dir = RAW_DIR / "Image"
+    images_dir.mkdir(parents=True, exist_ok=True)
+
+    for zname in ("train.zip", "test.zip"):
+        zip_path = images_dir / zname
+        if zip_path.exists():
+            if not (images_dir / zname.replace(".zip", "")).exists():
+                c.run(f'unzip -q "{zip_path}" -d "{images_dir}"')
+    
+    c.run(f'rm -rf {images_dir}/__MACOSX')
 
 @task(pre=[setup])
 def build(c):
