@@ -47,6 +47,14 @@ def setup(c):
     
     c.run(f'rm -rf {images_dir}/__MACOSX')
 
+    if not (PIGLIFE_DIR / "coco" / "annotations").exists():
+        c.run(f'mkdir -p {PIGLIFE_DIR / "coco" / "annotations"}')
+        c.run(f'mv {images_dir / "pig_coco_test.json"} {PIGLIFE_DIR / "coco" / "annotations" / "instances_test.json"}')
+        c.run(f'mv {images_dir / "pig_coco_train.json"} {PIGLIFE_DIR / "coco" / "annotations" / "instances_train.json"}')
+        c.run(f'python {PROJECT_DIR / "datasets" / "sanitize.py"}')
+    
+    c.run(f'python {PROJECT_DIR / "datasets" / "convert.py"}')
+
 @task(pre=[setup])
 def build(c):
     print("Finished! PigLife dataset is ready in the 'raw' directory.")
