@@ -1,6 +1,8 @@
 from pathlib import Path
 from dotenv import load_dotenv
 from invoke import task
+from tqdm import tqdm
+import time
 import os
 
 PROJECT_DIR = Path(__file__).resolve().parent
@@ -26,7 +28,7 @@ def download(c):
         )
 
     if not (ZIP_DIR / "piglife.zip").exists():
-        c.run(f'wget -O "{ZIP_DIR / "piglife.zip"}" "{PIGLIFE_URL}"')
+        c.run(f'wget -q --show-progress -O "{ZIP_DIR / "piglife.zip"}" "{PIGLIFE_URL}"')
 
 @task(pre=[download])
 def setup(c):
@@ -43,17 +45,21 @@ def setup(c):
         zip_path = images_dir / zname
         if zip_path.exists():
             if not (images_dir / zname.replace(".zip", "")).exists():
-                c.run(f'unzip -q "{zip_path}" -d "{images_dir}"')
+                with tqdm(total=1, bar_format="{desc}{elapsed}", desc="unzipping...") as pbar:
+                    c.run(f'unzip -q "{zip_path}" -d "{images_dir}"')
+                    pbar.update(1)
     
     c.run(f'rm -rf {images_dir}/__MACOSX')
 
+    c.run(f'python {PROJECT_DIR / "datasets" / "sanitize.py"}')
+
     if not (PIGLIFE_DIR / "coco" / "annotations").exists():
-        c.run(f'mkdir -p {PIGLIFE_DIR / "coco" / "annotations"}')
-        c.run(f'mv {images_dir / "pig_coco_test.json"} {PIGLIFE_DIR / "coco" / "annotations" / "instances_test.json"}')
-        c.run(f'mv {images_dir / "pig_coco_train.json"} {PIGLIFE_DIR / "coco" / "annotations" / "instances_train.json"}')
-        c.run(f'python {PROJECT_DIR / "datasets" / "sanitize.py"}')
-    
-    c.run(f'python {PROJECT_DIR / "datasets" / "convert.py"}')
+        c.run(f'mkdir -p "{PIGLIFE_DIR / "coco" / "annotations"}"')
+        c.run(f'python "{PROJECT_DIR / "datasets" / "split.py"}"')
+        source_json = images_dir / "pig_coco_test.json"
+        dest_file = PIGLIFE_DIR / "coco" / "annotations" / "instances_test.json"
+        c.run(f'cp "{source_json}" "{dest_file}"')
+        c.run(f'python "{PROJECT_DIR / "datasets" / "convert.py"}"')
 
 @task(pre=[setup])
 def build(c):
