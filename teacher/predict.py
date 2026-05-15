@@ -13,11 +13,11 @@ from transformers import Sam3Processor, Sam3Model
 CLASS_PROMPT = "pig"
 CLASS_ID = 1
 CONFIDENCE_THRESHOLD = 0.4
-SOURCE_ROOT = "/hd2/marcos/research/repos/pig-segmentation-distill/data/PigLife"
+SOURCE_ROOT = "/hd2/marcos/research/repos/pig-segmentation-distill/datasets/piglife/yolo"
 OUTPUT_ROOT = "/hd2/marcos/research/repos/pig-segmentation-distill/teacher"
 
 def generate_predictions(subset_name, model, processor, device):
-    image_dir = os.path.join(SOURCE_ROOT, subset_name, "images")
+    image_dir = os.path.join(SOURCE_ROOT, "images", subset_name)
 
     image_files = [f for f in os.listdir(image_dir) if f.lower().endswith((".jpg", ".jpeg", ".png"))]
     coco_results = []
@@ -56,7 +56,7 @@ def generate_predictions(subset_name, model, processor, device):
                 "score": round(float(score), 4)
             })
 
-    output_file = os.path.join(OUTPUT_ROOT, f"predictions_threshold_{CONFIDENCE_THRESHOLD}.json")
+    output_file = os.path.join(OUTPUT_ROOT, f"predictions_{subset_name}.json")
     with open(output_file, "w") as f:
         json.dump(coco_results, f)
     
