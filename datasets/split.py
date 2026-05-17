@@ -6,7 +6,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent
 
 INPUT_ANNOTATIONS_DIR = BASE_DIR / "piglife" / "raw" / "Image"
-OUTPUT_ANNOTATIONS_DIR = BASE_DIR / "piglife" / "coco" / "annotations"
+OUTPUT_ANNOTATIONS_DIR = BASE_DIR / "piglife" / "coco" / "human" / "annotations"
 
 def run_split(input_json, train_json, val_json, ratio=0.8):
     coco = COCO(input_json)

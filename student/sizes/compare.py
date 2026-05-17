@@ -4,11 +4,13 @@ import pandas as pd
 import torch
 import utils
 
+BASE_DIR = Path(__file__).resolve().parent
+
 PROJECT_NAME = "results"
 CONTEXT = "baseline"
-DATA_CONFIG = f"/hd2/marcos/research/repos/pig-segmentation-distill/student/sizes/results/{CONTEXT}/data.yaml"
-GT_ROOT_TEST = "/hd2/marcos/research/repos/pig-segmentation-distill/data/PigLife/test/images"
-MODELS_FOLDER = f"/hd2/marcos/research/repos/pig-segmentation-distill/models/detection"
+DATA_CONFIG = f"{BASE_DIR}/results/{CONTEXT}/data.yaml"
+GT_ROOT_TEST = f"{BASE_DIR}/data/PigLife/test/images"
+MODELS_FOLDER = f"{BASE_DIR}/models/detection"
 MODELS = ['yolov8n.pt', 'yolov8s.pt', 'yolov8m.pt']
 
 EPOCHS = 100

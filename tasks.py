@@ -57,7 +57,7 @@ def setup(c):
         
         if not any(RAW_DIR.iterdir()):
             progress.add_task(description="Extracting main dataset...", total=None)
-            c.run(f'unzip -q "{piglife_zip}" -d "{RAW_DIR}"')
+            c.run(f'unzip -q "{piglife_zip}" -d "{RAW_DIR}" -x "Video/*"')
 
         images_dir.mkdir(parents=True, exist_ok=True)
         for zname in ("train.zip", "test.zip"):
@@ -84,7 +84,7 @@ def setup(c):
             c.run(f'python "{PROJECT_DIR}/datasets/{script}"', hide=True)
             
             if script == "split.py":
-                anno_path = PIGLIFE_DIR / "coco" / "annotations"
+                anno_path = PIGLIFE_DIR / "coco" / "human" / "annotations"
                 anno_path.mkdir(parents=True, exist_ok=True)
                 
                 source_json = images_dir / "pig_coco_test.json"

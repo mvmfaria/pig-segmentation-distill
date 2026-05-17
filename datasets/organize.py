@@ -16,19 +16,19 @@ def sync_images_with_labels(label_dir, src_img_dir, dest_img_dir):
             shutil.copy(src_path, dest_path)
     
 sync_images_with_labels(
-    label_dir="datasets/piglife/yolo/labels/train", 
+    label_dir="datasets/piglife/yolo/human/labels/train", 
     src_img_dir="datasets/piglife/raw/Image/train",
-    dest_img_dir="datasets/piglife/yolo/images/train"
+    dest_img_dir="datasets/piglife/yolo/human/images/train"
 )
 
 sync_images_with_labels(
-    label_dir="datasets/piglife/yolo/labels/val", 
+    label_dir="datasets/piglife/yolo/human/labels/val", 
     src_img_dir="datasets/piglife/raw/Image/train",
-    dest_img_dir="datasets/piglife/yolo/images/val"
+    dest_img_dir="datasets/piglife/yolo/human/images/val"
 )
 
 sync_images_with_labels(
-    label_dir="datasets/piglife/yolo/labels/test", 
+    label_dir="datasets/piglife/yolo/human/labels/test", 
     src_img_dir="datasets/piglife/raw/Image/test",
-    dest_img_dir="datasets/piglife/yolo/images/test"
+    dest_img_dir="datasets/piglife/yolo/human/images/test"
 )

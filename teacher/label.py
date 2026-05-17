@@ -4,6 +4,7 @@ from PIL import Image
 from tqdm import tqdm
 from dotenv import load_dotenv
 import json
+from pathlib import Path
 
 load_dotenv()
 token = os.getenv("HF_TOKEN")
@@ -13,17 +14,19 @@ from transformers import Sam3Processor, Sam3Model
 CLASS_PROMPT = "pig"
 CLASS_ID = 1
 CONFIDENCE_THRESHOLD = 0.4
-SOURCE_ROOT = "/hd2/marcos/research/repos/pig-segmentation-distill/datasets/piglife/yolo"
-OUTPUT_ROOT = "/hd2/marcos/research/repos/pig-segmentation-distill/teacher"
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+SOURCE_ROOT = BASE_DIR / "datasets" / "piglife" / "yolo" / "human"
+OUTPUT_ROOT = BASE_DIR / "datasets" / "piglife" / "coco" / "sam3" / "annotations"
 
 def generate_predictions(subset_name, model, processor, device):
-    image_dir = os.path.join(SOURCE_ROOT, "images", subset_name)
+    image_dir = SOURCE_ROOT / "images" / subset_name
 
     image_files = [f for f in os.listdir(image_dir) if f.lower().endswith((".jpg", ".jpeg", ".png"))]
     coco_results = []
 
     for img_name in tqdm(image_files):
-        img_path = os.path.join(image_dir, img_name)
+        img_path = image_dir / img_name
         image = Image.open(img_path).convert("RGB")
         
         inputs = processor(images=image, text=CLASS_PROMPT, return_tensors="pt").to(device, dtype=torch.bfloat16)
@@ -56,7 +59,8 @@ def generate_predictions(subset_name, model, processor, device):
                 "score": round(float(score), 4)
             })
 
-    output_file = os.path.join(OUTPUT_ROOT, f"predictions_{subset_name}.json")
+    os.makedirs(OUTPUT_ROOT, exist_ok=True)
+    output_file = OUTPUT_ROOT / f"instances_{subset_name}.json"
     with open(output_file, "w") as f:
         json.dump(coco_results, f)
     
@@ -69,5 +73,7 @@ if __name__ == "__main__":
     ).to(device)
     
     processor = Sam3Processor.from_pretrained("facebook/sam3")
-    
-    generate_predictions("test", model, processor, device)
+
+    subsets = ["train", "val", "test"]
+    for subset in subsets:
+        generate_predictions(subset, model, processor, device)
