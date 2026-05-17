@@ -21,13 +21,21 @@ OUTPUT_ROOT = BASE_DIR / "datasets" / "piglife" / "coco" / "sam3" / "annotations
 
 def generate_predictions(subset_name, model, processor, device):
     image_dir = SOURCE_ROOT / "images" / subset_name
-
     image_files = [f for f in os.listdir(image_dir) if f.lower().endswith((".jpg", ".jpeg", ".png"))]
-    coco_results = []
+    
+    coco_data = {
+        "images": [],
+        "annotations": [],
+        "categories": [{"supercategory": CLASS_PROMPT, "id": CLASS_ID, "name": CLASS_PROMPT}]
+    }
+
+    img_id_counter = 1
+    ann_id_counter = 1
 
     for img_name in tqdm(image_files):
         img_path = image_dir / img_name
         image = Image.open(img_path).convert("RGB")
+        img_width, img_height = image.size
         
         inputs = processor(images=image, text=CLASS_PROMPT, return_tensors="pt").to(device, dtype=torch.bfloat16)
         with torch.no_grad():
@@ -37,32 +45,49 @@ def generate_predictions(subset_name, model, processor, device):
             outputs, 
             threshold=CONFIDENCE_THRESHOLD, 
             target_sizes=inputs.get("original_sizes").tolist()
-        )[0]
-        
-        boxes = results["boxes"].float().cpu().numpy()
-        scores = results["scores"].float().cpu().numpy()
+        )
 
-        image_id = os.path.splitext(img_name)[0]
+        prediction = results[0] if isinstance(results, list) else results
+        boxes_tensor = prediction.get("boxes") if isinstance(prediction, dict) else None
+        scores_tensor = prediction.get("scores") if isinstance(prediction, dict) else None
+
+        if boxes_tensor is None or scores_tensor is None:
+            boxes = []
+            scores = []
+        else:
+            boxes = boxes_tensor.float().cpu().numpy()
+            scores = scores_tensor.float().cpu().numpy()
+
+        coco_data["images"].append({
+            "height": img_height,
+            "width": img_width,
+            "id": img_id_counter,
+            "file_name": img_name
+        })
 
         for box, score in zip(boxes, scores):
             x_min, y_min, x_max, y_max = box
             width = x_max - x_min
             height = y_max - y_min
+            area = width * height
 
-            coco_results.append({
-                "image_id": image_id,
+            coco_data["annotations"].append({
+                "iscrowd": 0,
+                "image_id": img_id_counter,
+                "bbox": [round(float(x_min), 2), round(float(y_min), 2), round(float(width), 2), round(float(height), 2)],
                 "category_id": CLASS_ID,
-                "bbox": [round(float(x_min), 2), 
-                         round(float(y_min), 2), 
-                         round(float(width), 2), 
-                         round(float(height), 2)],
-                "score": round(float(score), 4)
+                "id": ann_id_counter,
+                "area": round(float(area), 2),
+                "segmentation": []
             })
+            ann_id_counter += 1
+            
+        img_id_counter += 1
 
     os.makedirs(OUTPUT_ROOT, exist_ok=True)
     output_file = OUTPUT_ROOT / f"instances_{subset_name}.json"
     with open(output_file, "w") as f:
-        json.dump(coco_results, f)
+        json.dump(coco_data, f, indent=2)
     
 if __name__ == "__main__":
     device = "cuda" if torch.cuda.is_available() else "cpu"
